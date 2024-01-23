@@ -1,6 +1,6 @@
 import os
 import openpyxl as pyxl
-import datetime import date
+from datetime import date
 
 class tracker: 
 
