@@ -4,7 +4,7 @@ from datetime import date
 
 class tracker: 
 
-    def initialize(tracker_loc)
+    def initialize(tracker_loc):
     if not os.path.exists(tracker_loc):
         wb= pyxl.Workbook()
         ws=wb.active
@@ -20,7 +20,7 @@ class tracker:
         wb= pyxl.load_workbook(tracker_loc)
         ws1=wb['Data_Tracking']
 
-    def append_tracker(fc_name,feats,method,username)
+    def append_tracker(fc_name,feats,method,username):
     xlsx_append=[date.today, fc_name, feats, method, username]
             print(xlsx_append)
             ws1.append(xlsx_append)
