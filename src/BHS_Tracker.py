@@ -2,11 +2,6 @@ import os
 import openpyxl as pyxl
 import datetime import date
 
-
-
-
-tracker=r'BHS_Consolidated_Dataset_Tracking.xlsx'
-
 class tracker: 
 
     def initialize(tracker_loc)
