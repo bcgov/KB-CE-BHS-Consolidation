@@ -15,10 +15,6 @@ from datetime import date
 
 import BHS_Tracker
 
-tracker = BHS_Tracker.tracker(tracker_sheet)
-
-tracker.initialize(tracker_sheet)
-
 
 class spi_check_merge: 
 
@@ -32,6 +28,10 @@ class spi_check_merge:
         self.consolidated_gdb= consolidated_gdb
         self.temp_gdb= temp_gdb
         logging.basicConfig(level=logging.DEBUG)
+
+        tracker = BHS_Tracker.tracker(tracker_sheet)
+
+        tracker.initialize(tracker_sheet)
     #=========================================================================================================================
 
 

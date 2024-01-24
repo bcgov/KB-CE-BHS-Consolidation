@@ -7,6 +7,8 @@ import BHS_Local_Check_Merge as local
 import BHS_SPI_Check_Merge as spi
 import BHS_Tracker as tracker
 
+logging.basicConfig(level=logging.DEBUG)
+
 #variables
 username= input("Enter BCGW user name: ")
 password =getpass(prompt="Enter BCGW password: ")
@@ -26,7 +28,7 @@ new_fcs=[inp_1, inp_2,inp_3,inp_4]
 
 
 #flag to run spi check merge
-spi_flag=False
+spi_flag=True
 
 if spi_flag = True:
     logging.debug('starting SPI')
