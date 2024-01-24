@@ -19,6 +19,8 @@ from datetime import date
 #get oracle username and password 
 bcgw_username= input("Enter BCGW user name: ")
 bcgw_password =getpass(prompt="Enter BCGW password: ")
+bcgw_host_nm=input("enter BCGW host name: ")
+bcgw_service_nm=input ("enter BCGW Service name: ")
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -62,13 +64,13 @@ def set_up_reqs():
 
 
 #=========================================================================================================================
-def oracle_connect(username, password):
+def oracle_connect(username, password,hostnm, srvcnm ):
     #create oracle connection and engine
     dialect="oracle"
     sql_driver="cx_oracle"
-    hostname="bcgw.bcgov"
+    hostname=hostnm
     port=1521
-    service_name="idwprod1.bcgov"
+    service_name=srvcnm
 
     #  Connection string
     oracle_connection_string_fmt = (
@@ -331,7 +333,7 @@ def update_fc_from_spi(exsitng_gdb):
 
 
 set_up_reqs()
-oracle_connect(bcgw_username, bcgw_password)
+oracle_connect(bcgw_username, bcgw_password, bcgw_host_nm, bcgw_service_nm)
 excute_quries(spi_obvs_df,spi_tele_df)
 update_fc_from_spi(consolidated_gdb)
 
