@@ -47,7 +47,7 @@ class local_fc:
 
 
     def initialize():
-        if arcpy.Exists(temp_out):
+        if arcpy.Exists(self.temp_out):
             logging.debug('gdb exists')
         else:
             arcpy.management.CreateFileGDB(r'T:\bhs_test','bhs_temp_data.gdb')
