@@ -25,9 +25,9 @@ class tracker:
     def append_tracker(self,fc_name,feats,method,username):
         wb= pyxl.load_workbook(self.tracker_loc)
         ws1=wb['Data_Tracking']
-        today_str = date.today().strftime('%Y-%m-%d')
+        today_str = date.today()
         print(type(today_str))
-        xlsx_append=[today_str, fc_name, feats, method, username]
+        xlsx_append=[today_str.strftime('%Y/m%/d%'), fc_name, feats, method, username]
         print(xlsx_append)
         ws1.append(xlsx_append)
         wb.save(self.tracker_loc)
