@@ -16,6 +16,8 @@ class local_fc:
         self.new_fcs= new_fcs
         self.usr_nm= usr_nm
 
+        temp_out=self.temp_out
+
         logging.basicConfig(level=logging.DEBUG)
         w_m_codeblock="""def cat (m, d):
             if m <=3:

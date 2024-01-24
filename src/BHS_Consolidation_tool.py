@@ -1,6 +1,5 @@
 import arcpy 
 import os
-import path
 import logging 
 
 import BHS_Local_Check_Merge as local 
@@ -15,7 +14,7 @@ password =getpass(prompt="Enter BCGW password: ")
 host_nm=input("enter BCGW host name: ")
 service_nm=input ("enter BCGW Service name: ")
 consolidated_gdb_loc=r"\01_CE\BHS\BHS_Scratch\BHS_Test_3.gdb"
-temp_gdb_loc=r"T:\BHS_Temp.gdb"
+temp_gdb_loc=r"T:\bhs_test\BHS_Temp.gdb"
 
 
 #input data, value to dictionary must be either Survey or Telemetry
@@ -30,7 +29,7 @@ new_fcs=[inp_1, inp_2,inp_3,inp_4]
 #flag to run spi check merge
 spi_flag=True
 
-if spi_flag = True:
+if spi_flag == True:
     logging.debug('starting SPI')
     spi.spi_check_merge(username, password, host_nm, service_nm, consolidated_gdb_loc, temp_gdb_loc)
 
