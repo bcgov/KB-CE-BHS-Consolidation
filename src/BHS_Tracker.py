@@ -3,8 +3,10 @@ import openpyxl as pyxl
 from datetime import date
 
 class tracker: 
+    def __init__ (self, tracker_loc) :
+        self.tracker_loc=tracker_loc
 
-    def initialize(self,tracker_loc):
+    def initialize(self, tracker_loc):
         if not os.path.exists(tracker_loc):
             wb= pyxl.Workbook()
             ws=wb.active
