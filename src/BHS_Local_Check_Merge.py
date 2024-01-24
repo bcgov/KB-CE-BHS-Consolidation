@@ -7,46 +7,42 @@ import pathlib
 
 import BHS_Tracker
 
-logging.basicConfig(level=logging.DEBUG)
-
-w_m_codeblock="""def cat (m, d):
-    if m <=3:
-        return 'Winter'
-    elif m == 12 and d >=15:
-        return 'Winter'
-    elif m == 11:
-        return 'Movement'
-    elif m == 12 and d <15:
-        return 'Movement'
-    elif m ==4 or m ==5:
-        return 'Movement'"""
-
-tracker_sheet=r'T:\bhs_test\BHS_Consolidated_Dataset_Tracking.xlsx'
-tracker = BHS_Tracker.tracker(tracker_sheet)
-tracker.initialize(tracker_sheet)
-
-#existing data to append to
-current_wrkspc=r'T:\bhs_test\BHS_Test_3.gdb'
-temp_out=r'T:\bhs_test\bhs_temp_data.gdb'
-
-#identifies current consolidated layers
-e_winter_pre=fr"{current_wrkspc}/BHS_Winter_Pre_1998"
-e_winter_post=fr"{current_wrkspc}/BHS_Winter_Post_1998"
-e_movement_pre=fr"{current_wrkspc}/BHS_Movement_Pre_1998"
-e_movement_post=fr"{current_wrkspc}/BHS_Movement_Post_1998"
-
-#input data, value to dictionary must be either Survey or Telemetry
-inp_1= {r'T:\bhs_test\BHS_collar_shp\EVW_BHS_collar_locations_13Nov23.shp':'Telemetry'}
-inp_2={r'T:\bhs_test\merge_test.gdb\EVW_BHS_Collar_Nov_23':'Telemetry'}
-inp_3= {None:None}
-inp_4={None:None}
-#maybe just make the entire thing a dictionary and not a list 
-new_fcs=[inp_1, inp_2,inp_3,inp_4]
 
 class local_fc:
+    def __init__ (self, current_wrkspc, temp_out, new_fcs, usr_nm) :
+        
+        self.current_wrkspc= current_wrkspc
+        self.temp_out= temp_out
+        self.new_fcs= new_fcs
+        self.usr_nm= usr_nm
 
-    def __init__ (self) :
-        self
+        logging.basicConfig(level=logging.DEBUG)
+        w_m_codeblock="""def cat (m, d):
+            if m <=3:
+                return 'Winter'
+            elif m == 12 and d >=15:
+                return 'Winter'
+            elif m == 11:
+                return 'Movement'
+            elif m == 12 and d <15:
+                return 'Movement'
+            elif m ==4 or m ==5:
+                return 'Movement'"""
+
+        tracker = BHS_Tracker.tracker(tracker_sheet)
+        tracker.initialize(tracker_sheet)
+
+        #existing data to append to
+        
+        
+
+        #identifies current consolidated layers
+        e_winter_pre=fr"{current_wrkspc}/BHS_Winter_Pre_1998"
+        e_winter_post=fr"{current_wrkspc}/BHS_Winter_Post_1998"
+        e_movement_pre=fr"{current_wrkspc}/BHS_Movement_Pre_1998"
+        e_movement_post=fr"{current_wrkspc}/BHS_Movement_Post_1998"
+
+
 
     def initialize():
         if arcpy.Exists(temp_out):
@@ -288,4 +284,3 @@ class local_fc:
 
 local_fc.initialize()
 local_fc.check_merge(new_fcs)
-# 
