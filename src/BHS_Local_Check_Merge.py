@@ -15,11 +15,13 @@ class local_fc:
         self.new_fcs_l= new_fcs_l
         self.user_nm= user_nm
 
+        #user parameters
         current_wrkspc=self.crnt_wrkspc
         temp_out=self.temp_output
         new_fcs=self.new_fcs_l
         usr_nm= self.user_nm
 
+        arcpy.env.overwriteOutput = True
         logging.basicConfig(level=logging.DEBUG)
         w_m_codeblock="""def cat (m, d):
             if m <=3:
@@ -48,7 +50,7 @@ class local_fc:
 
 
 
-    def initialize(self):
+    def initialize_l(self):
         if arcpy.Exists(self.temp_out):
             logging.debug('gdb exists')
         else:
@@ -286,5 +288,5 @@ class local_fc:
         tracker.append_tracker(fc,feat, meth, usern)
 
 
-local_fc.initialize(self)
-local_fc.check_merge(new_fcs)
+local_fc.initialize_l(self)
+local_fc.check_merge(self,new_fcs)
