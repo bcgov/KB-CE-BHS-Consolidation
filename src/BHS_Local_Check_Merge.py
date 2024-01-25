@@ -9,14 +9,18 @@ import BHS_Tracker
 
 
 class local_fc:
-    def __init__ (self, current_wrkspc, temp_out, new_fcs, usr_nm) :
+    def __init__ (self, crnt_wrkspc, temp_output, new_fcs_l, user_nm) :
         
-        self.current_wrkspc= current_wrkspc
-        self.temp_out= temp_out
-        self.new_fcs= new_fcs
-        self.usr_nm= usr_nm
+        self.crnt_wrkspc= crnt_wrkspc
+        self.temp_output= temp_output
+        self.new_fcs_l= new_fcs_l
+        self.user_nm= user_nm
+        
 
-        temp_out=self.temp_out
+        current_wrkspc=self.crnt_wrkspc
+        temp_out=self.temp_output
+        new_fcs=self.new_fcs_l
+        usr_nm= self.user_nm
 
         logging.basicConfig(level=logging.DEBUG)
         w_m_codeblock="""def cat (m, d):
@@ -47,7 +51,7 @@ class local_fc:
 
 
     def initialize():
-        if arcpy.Exists(self.temp_out):
+        if arcpy.Exists(temp_out):
             logging.debug('gdb exists')
         else:
             arcpy.management.CreateFileGDB(r'T:\bhs_test','bhs_temp_data.gdb')
