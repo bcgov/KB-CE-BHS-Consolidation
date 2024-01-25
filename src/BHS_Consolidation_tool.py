@@ -12,8 +12,8 @@ logging.basicConfig(level=logging.DEBUG)
 #variables
 username= input("Enter BCGW user name: ")
 password =getpass(prompt="Enter BCGW password: ")
-host_nm= "bcgw.bcgov"  #=input("enter BCGW host name: ")
-service_nm="idwprod1.bcgov"#=input ("enter BCGW Service name: ")
+host_nm= input("enter BCGW host name: ")
+service_nm=input ("enter BCGW Service name: ")
 consolidated_gdb_loc=r"T:\bhs_test\BHS_Test_3.gdb"
 temp_gdb_loc=r"T:\bhs_test\BHS_Temp.gdb"
 tracker_location=r'T:\bhs_test\BHS_Consolidated_Dataset_Tracking.xlsx'
