@@ -50,13 +50,13 @@ class local_fc:
 
 
 
-    def initialize_l(self):
-        if arcpy.Exists(self.temp_out):
+    def initialize_l(temp):
+        if arcpy.Exists(temp):
             logging.debug('gdb exists')
         else:
             arcpy.management.CreateFileGDB(r'T:\bhs_test','bhs_temp_data.gdb')
             logging.debug('gdb created')
-        arcpy.env.workspace=self.temp_out
+        arcpy.env.workspace=temp
 
     def check_merge(self, feature_list):
         #sort features into categories 
@@ -284,9 +284,9 @@ class local_fc:
                            
             
 #test function not for production
-    def xlsx_test(self, fc,feat, meth, usern):
+    def xlsx_test( fc,feat, meth, usern):
         tracker.append_tracker(fc,feat, meth, usern)
 
 
-local_fc.initialize_l(self)
-local_fc.check_merge(self,new_fcs)
+local_fc.initialize_l(self.temp_out)
+local_fc.check_merge(new_fcs)
