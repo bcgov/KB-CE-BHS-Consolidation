@@ -2,15 +2,18 @@
 import logging
 import sqlalchemy 
 import pip
+import sys
+import subprocess
 try:
     import cx_Oracle
 except:
-    pip._internal.main(["install", "cx-oracle"])
+    # pip._internal.main(["install", "cx-oracle"])
+    subprocess.check_call(["pip", "install", "cx-oracle"])
+
 from getpass import getpass
 import pandas
 import arcpy
 import os
-import openpyxl as pyxl
 from datetime import date
 
 import BHS_Tracker
@@ -19,7 +22,7 @@ import BHS_Tracker
 class spi_check_merge: 
 
     #=========================================================================================================================
-    def __init__(self, bcgw_username, bcgw_password, bcgw_host_nm, bcgw_service_nm, consolidated_gdb, temp_gdb ):
+    def __init__(self, bcgw_username, bcgw_password, bcgw_host_nm, bcgw_service_nm, consolidated_gdb, temp_gdb, tracker_sheet ):
         #get oracle username and password 
         self.bcgw_username=bcgw_username
         self.bcgw_password= bcgw_password
@@ -30,7 +33,6 @@ class spi_check_merge:
         logging.basicConfig(level=logging.DEBUG)
 
         tracker = BHS_Tracker.tracker(tracker_sheet)
-
         tracker.initialize(tracker_sheet)
     #=========================================================================================================================
 
@@ -38,11 +40,10 @@ class spi_check_merge:
 
 
     #=========================================================================================================================
-    def set_up_reqs():
+    def set_up_reqs(self,temp_gdb):
         #create temp gdb if it does not exist
-        fgdb: LiteralString=os.path.join( "T: ", "BHS_Temp.gdb ")
-        if not arcpy.Exists(fgdb):
-            arcpy.management.CreateFileGDB( "T: ", "BHS_Temp.gdb ")
+        if not arcpy.Exists(temp_gdb):
+            arcpy.management.CreateFileGDB( os.path.dirname(temp_gdb), "BHS_Temp.gdb ")
         else: 
             logging.debug("gdb exists")
     #=========================================================================================================================
@@ -51,7 +52,7 @@ class spi_check_merge:
 
 
     #=========================================================================================================================
-    def oracle_connect(username, password,hostnm, srvcnm ):
+    def oracle_connect(self,username, password,hostnm, srvcnm ):
         #create oracle connection and engine
         dialect="oracle"
         sql_driver="cx_oracle"
@@ -61,7 +62,7 @@ class spi_check_merge:
 
         #  Connection string
         oracle_connection_string_fmt = (
-            "oracle+cx_oracle://{username}:{password}@" +
+            f"oracle+cx_oracle://{username}:{password}@" +
             cx_Oracle.makedsn("{hostname}", "{port}", service_name="{service_name}")
         )
         url = oracle_connection_string_fmt.format(
@@ -71,8 +72,8 @@ class spi_check_merge:
         )
 
         engine: sqlalchemy.engine.Engine = sqlalchemy.create_engine(url, echo=True)
-        conn = engine.connect()
-        metadata=sqlalchemy.MetaData()
+        self.conn = engine.connect()
+        self.metadata=sqlalchemy.MetaData()
     #=========================================================================================================================
 
 
@@ -158,10 +159,10 @@ class spi_check_merge:
 
 
     #=========================================================================================================================
-    def excute_quries(obvs_df,tele_df):
+    def excute_quries(self):
         #execute queries
-        obvs_df=pandas.read_sql_query(sql_obvs, conn)
-        tele_df=pandas.read_sql_query(sql_tele, conn)
+        obvs_df=pandas.read_sql_query(self.spi_sql_obvs,self.conn)
+        tele_df=pandas.read_sql_query(self.spi_sql_tele, self.conn)
 
         #Merge results into one table 
         frames=[obvs_df,tele_df]
@@ -197,20 +198,7 @@ class spi_check_merge:
             logging.debug(len(pr_m.index))
             df_list.append(pr_m)
 
-        # # OG function to define date ranges in data here for reference m=month, d=day
-        # """def cat (m, d):
-        #     if m <=3:
-        #         return "Winter"
-        #     elif m == 12 and d >=15:
-        #         return "Winter"
-        #     elif m == 11:
-        #         return "Movement"
-        #     elif m == 12 and d <15:
-        #         return "Movement"
-        #     elif m ==4 or m ==5:
-        #         return "Movement""""
-
-        arcpy.env.workspace=fgdb
+        arcpy.env.workspace=self.temp_gdb
 
         #names for temp lyrs 
         tmp_lyrs=["Observations_post_winter_Temp", "Observations_post_movement_Temp", "Observations_pre_winter_Temp", "Observations_pre_movement_Temp",
@@ -221,7 +209,7 @@ class spi_check_merge:
         #create temp fc if they do not exist and add cols to it 
         for t,d in zip(tmp_lyrs,df_list):
             if not arcpy.Exists(t):
-                arcpy.management.CreateFeatureclass(fgdb,
+                arcpy.management.CreateFeatureclass(self.temp_gdb,
                     t,
                     "POINT",
                     spatial_reference=arcpy.SpatialReference(3005))
@@ -244,6 +232,7 @@ class spi_check_merge:
                     row_nm=row.tolist()
                     values = [point] + row_nm
                     cursor.insertRow(values)
+        self.conn.close()
 
 
     #=========================================================================================================================
@@ -251,7 +240,7 @@ class spi_check_merge:
 
 
     #=========================================================================================================================
-    def update_fc_from_spi(exsitng_gdb):
+    def update_fc_from_spi(self,exsitng_gdb):
         #FCs
         arcpy.env.workspace = exsitng_gdb
         # fc=arcpy.ListFeatureClasses()
@@ -267,14 +256,14 @@ class spi_check_merge:
         s_movement_post =os.path.join(exsitng_gdb, "BHS_Movement_Post_1998_Survey")
         t_movement_post =os.path.join(exsitng_gdb, "BHS_Movement_Post_1998_Telemetry")
 
-        new_s_winter_post=os.path.join(temp_gdb,"Observations_post_winter_Temp")
-        new_s_movement_post=os.path.join(temp_gdb,"Observations_post_movement_Temp")
-        new_s_winter_pre=os.path.join(temp_gdb,"Observations_pre_winter_Temp")
-        new_s_movement_pre=os.path.join(temp_gdb,"Observations_pre_movement_Temp")
-        new_t_winter_post=os.path.join(temp_gdb,"Telemetry_post_winter_Temp")
-        new_t_movement_post=os.path.join(temp_gdb,"Telemetry_post_movement_Temp")
-        new_t_winter_pre=os.path.join(temp_gdb,"Telemetry_pre_winter_Temp")
-        new_t_movement_pre=os.path.join(temp_gdb,"Telemetry_pre_movement_Temp")
+        new_s_winter_post=os.path.join(self.temp_gdb,"Observations_post_winter_Temp")
+        new_s_movement_post=os.path.join(self.temp_gdb,"Observations_post_movement_Temp")
+        new_s_winter_pre=os.path.join(self.temp_gdb,"Observations_pre_winter_Temp")
+        new_s_movement_pre=os.path.join(self.temp_gdb,"Observations_pre_movement_Temp")
+        new_t_winter_post=os.path.join(self.temp_gdb,"Telemetry_post_winter_Temp")
+        new_t_movement_post=os.path.join(self.temp_gdb,"Telemetry_post_movement_Temp")
+        new_t_winter_pre=os.path.join(self.temp_gdb,"Telemetry_pre_winter_Temp")
+        new_t_movement_pre=os.path.join(self.temp_gdb,"Telemetry_pre_movement_Temp")
 
         fc_dict={s_winter_pre:new_s_winter_pre,t_winter_pre:new_t_winter_pre, s_winter_post:new_s_winter_post, t_winter_post:new_t_winter_post,
                 s_movement_pre:new_s_movement_pre, t_movement_pre:new_t_movement_pre, s_movement_post:new_s_movement_post,  t_movement_post:new_t_movement_post}
@@ -315,8 +304,8 @@ class spi_check_merge:
 
 
 
-    set_up_reqs()
-    oracle_connect(bcgw_username, bcgw_password, bcgw_host_nm, bcgw_service_nm)
-    excute_quries(spi_obvs_df,spi_tele_df)
-    update_fc_from_spi(consolidated_gdb)
-    conn.close()
+    # set_up_reqs()
+    # oracle_connect(bcgw_username, bcgw_password, bcgw_host_nm, bcgw_service_nm)
+    # excute_quries(spi_obvs_df,spi_tele_df)
+    # update_fc_from_spi(consolidated_gdb)
+   

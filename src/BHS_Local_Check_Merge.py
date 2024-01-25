@@ -9,7 +9,7 @@ import BHS_Tracker
 
 
 class local_fc:
-    def __init__ (self, crnt_wrkspc, temp_output, new_fcs_l, user_nm):         
+    def __init__ (self, crnt_wrkspc, temp_output, new_fcs_l, user_nm, tracker_sheet):         
         self.crnt_wrkspc= crnt_wrkspc
         self.temp_output= temp_output
         self.new_fcs_l= new_fcs_l
@@ -23,7 +23,7 @@ class local_fc:
 
         arcpy.env.overwriteOutput = True
         logging.basicConfig(level=logging.DEBUG)
-        w_m_codeblock="""def cat (m, d):
+        self.w_m_codeblock="""def cat (m, d):
             if m <=3:
                 return 'Winter'
             elif m == 12 and d >=15:
@@ -35,28 +35,28 @@ class local_fc:
             elif m ==4 or m ==5:
                 return 'Movement'"""
 
-        tracker = BHS_Tracker.tracker(tracker_sheet)
-        tracker.initialize(tracker_sheet)
+        self.tracker = BHS_Tracker.tracker(tracker_sheet)
+        self.tracker.initialize(tracker_sheet)
 
         #existing data to append to
         
         
 
         #identifies current consolidated layers
-        e_winter_pre=fr"{current_wrkspc}/BHS_Winter_Pre_1998"
-        e_winter_post=fr"{current_wrkspc}/BHS_Winter_Post_1998"
-        e_movement_pre=fr"{current_wrkspc}/BHS_Movement_Pre_1998"
-        e_movement_post=fr"{current_wrkspc}/BHS_Movement_Post_1998"
+        self.e_winter_pre=fr"{current_wrkspc}/BHS_Winter_Pre_1998"
+        self.e_winter_post=fr"{current_wrkspc}/BHS_Winter_Post_1998"
+        self.e_movement_pre=fr"{current_wrkspc}/BHS_Movement_Pre_1998"
+        self.e_movement_post=fr"{current_wrkspc}/BHS_Movement_Post_1998"
 
 
 
-    def initialize_l(temp):
-        if arcpy.Exists(temp):
+    def initialize_l(self):
+        if arcpy.Exists(self.temp_output):
             logging.debug('gdb exists')
         else:
-            arcpy.management.CreateFileGDB(r'T:\bhs_test','bhs_temp_data.gdb')
+            arcpy.management.CreateFileGDB(r'T:\bhs_test','BHS_Temp.gdb')
             logging.debug('gdb created')
-        arcpy.env.workspace=temp
+        arcpy.env.workspace=self.temp_output
 
     def check_merge(self, feature_list):
         #sort features into categories 
@@ -70,8 +70,8 @@ class local_fc:
                     if key.endswith('.shp') or key.endswith('.lyr'):
                         f2f_name= pathlib.Path(key).stem
                         logging.debug(f" f2f name {f2f_name}")
-                        arcpy.conversion.FeatureClassToGeodatabase(key, temp_out )
-                        key=os.path.join(temp_out,f2f_name)
+                        arcpy.conversion.FeatureClassToGeodatabase(key, self.temp_output )
+                        key=os.path.join(self.temp_output,f2f_name)
                         logging.debug(f" new key {key}")
 
                     spatial_ref = arcpy.Describe(key).spatialReference
@@ -138,23 +138,23 @@ class local_fc:
                     logging.debug(f"{before_1998_count} features found with a date before 1998")
 
                     winter_pre="Year < 1998 And Cat ='Winter'"
-                    winter_pre_name=fr"{e_winter_pre}_{fc[keys]}"
+                    winter_pre_name=fr"{self.e_winter_pre}_{fc[keys]}"
 
                     winter_post="Year >= 1998 And Cat ='Winter'"
-                    winter_post_name=fr"{e_winter_post}_{fc[keys]}"
+                    winter_post_name=fr"{self.e_winter_post}_{fc[keys]}"
 
                     movement_pre="Year < 1998 And Cat ='Movement'" 
-                    movement_pre_name=fr"{e_movement_pre}_{fc[keys]}"
+                    movement_pre_name=fr"{self.e_movement_pre}_{fc[keys]}"
 
                     movement_post="Year < 1998 And Cat >='Movement'" 
-                    movement_post_name=fr"{e_movement_post}_{fc[keys]}"          
+                    movement_post_name=fr"{self.e_movement_post}_{fc[keys]}"          
                     
                 
 
                     if before_1998_count >0:
                         logging.info('Looking for features before 1998 to append')
                         arcpy.management.AddField(key, 'Cat', 'TEXT')
-                        arcpy.management.CalculateField(key, 'Cat', f"cat (!{month_field}!, !{day_field}!)",'PYTHON3',w_m_codeblock)
+                        arcpy.management.CalculateField(key, 'Cat', f"cat (!{month_field}!, !{day_field}!)",'PYTHON3',self.w_m_codeblock)
         
 
                         #condense with loop?
@@ -169,7 +169,7 @@ class local_fc:
                             fieldMappings.addTable(key)
                             arcpy.management.Append(key, winter_pre_name, schema_type= "NO_TEST ", field_mapping=fieldMappings, expression=winter_pre)
                             fieldMappings.removeAll()
-                            tracker.append_tracker(winter_pre_name,int(final_count), str(fc[keys]), str(usr_nm))
+                            self.tracker.append_tracker(winter_pre_name,int(final_count), str(fc[keys]), str(usr_nm))
                             logging.info('winter pre 1998 appended')
                             arcpy.SelectLayerByAttribute_management(key, "CLEAR_SELECTION")
                         else:
@@ -188,7 +188,7 @@ class local_fc:
                             fieldMappings.addTable(key)
                             arcpy.management.Append(key, winter_post_name, schema_type= "NO_TEST ", field_mapping=fieldMappings, expression=winter_post)
                             fieldMappings.removeAll()
-                            tracker.append_tracker(winter_post_name,int(final_count), str(fc[keys]), str(usr_nm))
+                            self.tracker.append_tracker(winter_post_name,int(final_count), str(fc[keys]), str(usr_nm))
                             logging.info('winter post 1998 appended')
                             arcpy.SelectLayerByAttribute_management(key, "CLEAR_SELECTION")
                         else:
@@ -207,7 +207,7 @@ class local_fc:
                             fieldMappings.addTable(key)
                             arcpy.management.Append(key, movement_pre_name, schema_type= "NO_TEST ", field_mapping=fieldMappings, expression=movement_pre)
                             fieldMappings.removeAll()
-                            tracker.append_tracker(movement_pre_name,int(final_count), str(fc[keys]), str(usr_nm))
+                            self.tracker.append_tracker(movement_pre_name,int(final_count), str(fc[keys]), str(usr_nm))
                             logging.info('Movement pre 1998 appended')
                             arcpy.SelectLayerByAttribute_management(key, "CLEAR_SELECTION")
                         else:
@@ -226,7 +226,7 @@ class local_fc:
                             fieldMappings.addTable(key)
                             arcpy.management.Append(key, movement_post_name, schema_type= "NO_TEST ", field_mapping=fieldMappings, expression=movement_post)
                             fieldMappings.removeAll()
-                            tracker.append_tracker(movement_post_name,int(final_count), str(fc[keys]), str(usr_nm))
+                            self.tracker.append_tracker(movement_post_name,int(final_count), str(fc[keys]), str(usr_nm))
                             logging.info('Movement post 1998 appended')
                             arcpy.SelectLayerByAttribute_management(key, "CLEAR_SELECTION")
                         else:
@@ -239,7 +239,7 @@ class local_fc:
 
                         
                         arcpy.management.AddField(key, 'Cat', 'TEXT')
-                        arcpy.management.CalculateField(key, 'Cat', f"cat (!{month_field}!, !{day_field}!)",'PYTHON3',w_m_codeblock)
+                        arcpy.management.CalculateField(key, 'Cat', f"cat (!{month_field}!, !{day_field}!)",'PYTHON3',self.w_m_codeblock)
                         logging.debug('Winter/Movement calculated')
                         
                         #condense with loop
@@ -254,7 +254,7 @@ class local_fc:
                             fieldMappings.addTable(key)
                             arcpy.management.Append(key, winter_post_name, schema_type= "NO_TEST", field_mapping=fieldMappings, expression=winter_post) 
                             fieldMappings.removeAll()
-                            tracker.append_tracker(str(winter_pre_name),(final_count), str(fc[keys]), str(usr_nm))      
+                            self.tracker.append_tracker(str(winter_pre_name),(final_count), str(fc[keys]), str(usr_nm))      
                             logging.info('post winter features appended')
                             arcpy.SelectLayerByAttribute_management(key, "CLEAR_SELECTION")
                         else:
@@ -275,7 +275,7 @@ class local_fc:
                             fieldMappings.addTable(key)
                             arcpy.management.Append(key, movement_post_name, schema_type= "NO_TEST", field_mapping=fieldMappings, expression=movement_post)
                             fieldMappings.removeAll()  
-                            tracker.append_tracker(movement_post_name,int(final_count), str(fc[keys]), str(usr_nm))
+                            self.tracker.append_tracker(movement_post_name,int(final_count), str(fc[keys]), str(usr_nm))
                             logging.info('post movement features appended')
                             arcpy.SelectLayerByAttribute_management(key, "CLEAR_SELECTION")
                         else:
@@ -288,5 +288,5 @@ class local_fc:
         tracker.append_tracker(fc,feat, meth, usern)
 
 
-local_fc.initialize_l(self.temp_out)
-local_fc.check_merge(new_fcs)
+# local_fc.initialize_l(self.temp_out)
+# local_fc.check_merge(new_fcs)

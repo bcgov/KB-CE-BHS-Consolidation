@@ -1,6 +1,7 @@
 import arcpy 
 import os
 import logging 
+from getpass import getpass
 
 import BHS_Local_Check_Merge as local 
 import BHS_SPI_Check_Merge as spi
@@ -11,10 +12,11 @@ logging.basicConfig(level=logging.DEBUG)
 #variables
 username= input("Enter BCGW user name: ")
 password =getpass(prompt="Enter BCGW password: ")
-host_nm=input("enter BCGW host name: ")
-service_nm=input ("enter BCGW Service name: ")
-consolidated_gdb_loc=r"\01_CE\BHS\BHS_Scratch\BHS_Test_3.gdb"
+host_nm= "bcgw.bcgov"  #=input("enter BCGW host name: ")
+service_nm="idwprod1.bcgov"#=input ("enter BCGW Service name: ")
+consolidated_gdb_loc=r"T:\bhs_test\BHS_Test_3.gdb"
 temp_gdb_loc=r"T:\bhs_test\BHS_Temp.gdb"
+tracker_location=r'T:\bhs_test\BHS_Consolidated_Dataset_Tracking.xlsx'
 
 
 #input data, value to dictionary must be either Survey or Telemetry
@@ -27,12 +29,18 @@ new_fcs=[inp_1, inp_2,inp_3,inp_4]
 
 
 #flag to run spi check merge
-spi_flag=True
+spi_flag=False
 
 if spi_flag == True:
     logging.debug('starting SPI')
-    spi.spi_check_merge(username, password, host_nm, service_nm, consolidated_gdb_loc, temp_gdb_loc)
-
+    spi_instance=spi.spi_check_merge(username, password, host_nm, service_nm, consolidated_gdb_loc, temp_gdb_loc, tracker_location)
+    spi_instance.set_up_reqs(temp_gdb_loc)
+    spi_instance.oracle_connect(username, password,host_nm, service_nm)
+    spi_instance.excute_quries()
+    spi_instance.update_fc_from_spi(consolidated_gdb_loc)
+                                          
 if new_fcs is not None:
     logging.debug('start local FC')
-    local.local_fc(consolidated_gdb_loc, temp_gdb_loc, new_fcs, username)
+    local_instance = local.local_fc(consolidated_gdb_loc, temp_gdb_loc, new_fcs, username, tracker_location)
+    local_instance.initialize_l()
+    local_instance.check_merge(new_fcs)
