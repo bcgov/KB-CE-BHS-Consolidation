@@ -9,13 +9,11 @@ import BHS_Tracker
 
 
 class local_fc:
-    def __init__ (self, crnt_wrkspc, temp_output, new_fcs_l, user_nm) :
-        
+    def __init__ (self, crnt_wrkspc, temp_output, new_fcs_l, user_nm):         
         self.crnt_wrkspc= crnt_wrkspc
         self.temp_output= temp_output
         self.new_fcs_l= new_fcs_l
         self.user_nm= user_nm
-        
 
         current_wrkspc=self.crnt_wrkspc
         temp_out=self.temp_output
@@ -50,7 +48,7 @@ class local_fc:
 
 
 
-    def initialize():
+    def initialize(self):
         if arcpy.Exists(temp_out):
             logging.debug('gdb exists')
         else:
@@ -58,7 +56,7 @@ class local_fc:
             logging.debug('gdb created')
         arcpy.env.workspace=temp_out
 
-    def check_merge(feature_list):
+    def check_merge(self, feature_list):
         #sort features into categories 
         #Pre/post, winter/movement 
         for fc in feature_list:
@@ -283,8 +281,8 @@ class local_fc:
                             arcpy.SelectLayerByAttribute_management(key, "CLEAR_SELECTION")
                            
             
-
-    def xlsx_test(fc,feat, meth, usern):
+#test function not for production
+    def xlsx_test(self, fc,feat, meth, usern):
         tracker.append_tracker(fc,feat, meth, usern)
 
 
