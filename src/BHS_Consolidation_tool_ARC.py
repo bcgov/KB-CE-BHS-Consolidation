@@ -20,6 +20,8 @@ tracker_location=arcpy.GetParameterAsText(6)
 
 
 #input data, value to dictionary must be either Survey or Telemetry
+#may have to be split up as get aprameter text balh and then put into dicts 
+#maybe even as a singel dict then have to re-format the loops but would get rid of one loop? 
 inp_1= {r'T:\bhs_test\BHS_collar_shp\EVW_BHS_collar_locations_13Nov23.shp':'Telemetry'}
 inp_2={r'T:\bhs_test\merge_test.gdb\EVW_BHS_Collar_Nov_23':'Telemetry'}
 inp_3= {None:None}
