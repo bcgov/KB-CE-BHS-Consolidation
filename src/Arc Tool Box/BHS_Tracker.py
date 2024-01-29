@@ -21,16 +21,18 @@ class tracker:
         else:
             wb= pyxl.load_workbook(tracker_loc)
             ws1=wb['Data_Tracking']
+        arcpy.AddMessage("Tracker initialized")
 
     def append_tracker(self,fc_name,feats,method,username):
         wb= pyxl.load_workbook(self.tracker_loc)
         ws1=wb['Data_Tracking']
         today = date.today().strftime("%Y-%m-%d")
-        print(type(today))
+        # print(type(today))
         xlsx_append=[today, fc_name, feats, method, username]
-        print(xlsx_append)
+        # print(xlsx_append)
         ws1.append(xlsx_append)
         wb.save(self.tracker_loc)
+        arcpy.AddMessage("Tracker appended")
 
 
 
