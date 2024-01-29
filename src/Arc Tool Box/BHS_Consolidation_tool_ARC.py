@@ -10,7 +10,7 @@ import BHS_Tracker as tracker
 logging.basicConfig(level=logging.DEBUG)
 
 #variables
-spi_flag=arcpy.GetParameterAsText(0)
+spi_flag=arcpy.arcpy.GetParameter(0)
 username= arcpy.GetParameterAsText(1)
 password =arcpy.GetParameterAsText(2)
 host_nm= arcpy.GetParameterAsText(3)
@@ -31,6 +31,14 @@ type_3=arcpy.GetParameterAsText(12)
 inp_4=arcpy.GetParameterAsText(13)
 type_4=arcpy.GetParameterAsText(14)
 
+if inp_1 =='':
+    inp_1= None
+if inp_2 =='':
+    inp_2= None    
+if inp_3 =='':
+    inp_3= None
+if inp_4 =='':
+    inp_4= None
 
 
 new_fcs={inp_1:type_1, inp_2:type_2, inp_3:type_3, inp_4:type_4}
@@ -38,6 +46,9 @@ new_fcs={inp_1:type_1, inp_2:type_2, inp_3:type_3, inp_4:type_4}
 
 temp_gdb_loc=r"T:\bhs_test\BHS_Temp.gdb"
 
+arcpy.AddMessage(f"input 1 {inp_1}")
+arcpy.AddMessage(f"input 1 type{type(inp_1)}")
+arcpy.AddMessage(f"new_ fcs class {new_fcs}")
 
 if spi_flag == True:
     logging.debug('starting SPI')
@@ -48,7 +59,7 @@ if spi_flag == True:
     spi_instance.excute_quries()
     spi_instance.update_fc_from_spi(consolidated_gdb_loc)
                                           
-if new_fcs is not None:
+if new_fcs is not None or new_fcs !="":
     logging.debug('start local FC')
     arcpy.AddMessage('Checking input feature calsses for new feature....')
     local_instance = local.local_fc(consolidated_gdb_loc, temp_gdb_loc, new_fcs, username, tracker_location)

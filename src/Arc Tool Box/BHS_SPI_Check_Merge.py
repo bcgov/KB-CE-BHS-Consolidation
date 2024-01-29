@@ -213,9 +213,9 @@ class spi_check_merge:
                     t,
                     "POINT",
                     spatial_reference=arcpy.SpatialReference(3005))
-                arcpy.addmessage(f"{t} created")
+                arcpy.AddMessage(f"{t} created")
             else: 
-                arcpy.addmessage(f"{t} already exists")
+                arcpy.AddMessage(f"{t} already exists")
             #add cols from df to fc
             for col in column_types:
                 if column_types[col] == "int64" or column_types[col] == "float64":
@@ -274,14 +274,14 @@ class spi_check_merge:
             print(fc_dict[key])
             sel_feats=arcpy.management.SelectLayerByLocation(fc_dict[key], "INTERSECT", key)
             sel_count=int(arcpy.GetCount_management (sel_feats).getOutput (0))
-            arcpy.addmessage(f"{sel_count} number of Features that intersect with exisitng layer")
+            arcpy.AddMessage(f"{sel_count} number of Features that intersect with exisitng layer")
 
             if sel_count >0:
-                arcpy.addmessage(f"{sel_count} features overlap, removing")
+                arcpy.AddMessage(f"{sel_count} features overlap, removing")
                 arcpy.management.DeleteFeatures(arcpy.management.SelectLayerByLocation(fc_dict[key], "INTERSECT", key))
                 
             feats=int(arcpy.management.GetCount(fc_dict[key]).getOutput (0))
-            arcpy.addmessage(f"{feats} remaining, adding to master...")
+            arcpy.AddMessage(f"{feats} remaining, adding to master...")
             if feats>0:
                 fieldMappings = arcpy.FieldMappings()
                 fieldMappings.addTable(key)
@@ -292,12 +292,12 @@ class spi_check_merge:
                 # arcpy.management.Merge([key,fc_dict[key]],os.path.join(temp_gdb,"merge_FM_test"),fieldMappings )
                 
                 arcpy.management.Append(fc_dict[key], key, schema_type= "NO_TEST ", field_mapping=fieldMappings)
-                arcpy.addmessage(f"append master class {key}")
+                arcpy.AddMessage(f"append master class {key}")
                 fc_name=os.path.basename(key)
                 tracker.append_tracker(fc_name,feats, "SPI", username)
                 # how do we get the source? flag from  maybe add prefix to temp data name?
             elif feats == 0:
-                arcpy.addmessage( "no new feats")
+                arcpy.AddMessage( "no new feats")
 
     #=========================================================================================================================
         
